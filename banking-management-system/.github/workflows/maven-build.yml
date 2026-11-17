@@ -1,0 +1,42 @@
+name: Maven Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17 (with Maven cache)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Compile
+        run: mvn -B clean compile
+
+      - name: Run unit tests
+        run: mvn -B test
+
+      - name: Build JAR and generate JaCoCo coverage report
+        run: mvn -B clean verify
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco
+
+      - name: Upload executable JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: banking-management-system-jar
+          path: target/banking-management-system.jar
